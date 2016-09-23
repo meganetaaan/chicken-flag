@@ -6,6 +6,12 @@ const app = new App({
   renderer: el => {
     render(el, document.querySelector('#app'));
   },
+  middlewares: [
+    (state) => {
+      console.log(state);
+      return state;
+    }
+  ],
   initialState: {
     tempo: {
       beat: 1,
@@ -13,6 +19,7 @@ const app = new App({
       bpm: 120
     },
     game: {
+      isOver: true,
       round: 0,
       label: [
         '白',
@@ -21,8 +28,8 @@ const app = new App({
         'に'
       ],
       order: {
-        red: 'up',
-        white: 'up'
+        red: 'down',
+        white: 'down'
       }
     },
     players: [
@@ -33,7 +40,7 @@ const app = new App({
           color: 'blue'
         },
         flag: {
-          red: 'up',
+          red: 'down',
           white: 'down'
         }
       }
@@ -43,4 +50,3 @@ const app = new App({
 });
 
 app.update(_initialState  => _initialState);
-app.start();

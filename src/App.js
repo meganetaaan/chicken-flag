@@ -9,7 +9,19 @@ function getPlayer(props) {
 function randomIn(arr){
   return arr[Math.floor(Math.random() * arr.length)];
 }
+
 const orders = [
+  {
+      label: [
+        '赤',
+        'あげ',
+        'て',
+        ' '
+      ],
+      order: {
+        red: 'up'
+      }
+  },
   {
       label: [
         '赤',
@@ -55,6 +67,7 @@ const orders = [
       }
   },
 ];
+
 const translation = {
   '赤': 'acka',
   '白': 'seiro',
@@ -75,10 +88,12 @@ class Speaker {
     const speechStr = translation[str];
     window.speechSynthesis.cancel();
     const speakThis = new SpeechSynthesisUtterance(speechStr);
+    //speakThis.lang = 'ja-JP';
     speakThis.rate = rate || 1.2;
     window.speechSynthesis.speak(speakThis);
   }
 }
+
 class Bird extends Component {
   render() {
     const isRedUp = this.props.flag.red === 'up';
@@ -99,14 +114,72 @@ class Order extends Component {
     const str = game.label.slice(0, tempo.beat + 1).join(' ');
     return <div className='order-label'>{str}</div>
   }
+}
+
+class GameController extends Component {
+  render() {
+    return <div className='game-controller'>
+    <button disabled={!this.props.isOver} type='button' onClick={() => this.dispatch('startGame')}>Start</button>
+    </div>
+  }
 
 }
+class FlagController extends Component {
+  render() {
+    return <div className='flag-controller'>
+    <button type='button' onClick={() => this.dispatch('toggleRed')}>Red</button>
+    <button type='button' onClick={() => this.dispatch('toggleWhite')}>White</button>
+    </div>
+  }
+}
+
+class Root extends Component {
+  render() {
+    const me = getPlayer(this.props);
+    return (
+    <div className='root' style={{margin: 0, padding: 5}}>
+    <GameController {...this.props.game}/>
+    <Order {...this.props}/>
+      <hr />
+    <Bird {...me}/>
+    <FlagController />
+    </div>
+    )
+  }
+}
+
 class App extends Flux {
+  isFlagCorrect() {
+    const myFlag = getPlayer(this.state).flag;
+    const correctFlag = this.state.game.order;
+    return myFlag.red === correctFlag.red &&
+      myFlag.white === correctFlag.white;
+  }
   start() {
+    if(this.interval) {
+      clearInterval(this.interval);
+    }
+    this.update((state) => {
+      state.game.isOver = false;
+      state.game.order = {red: 'down', white: 'down'};
+      state.game.round = 0;
+      getPlayer(state).flag = {red: 'down', white: 'down'};
+      state.tempo.beat = 0;
+      return state;
+    });
     const interval = 60 * 1000 / this.state.tempo.bpm;
-    setInterval(() => {
+    this.interval = setInterval(() => {
       this.nextStep();
     }, interval);
+  }
+  gameover() {
+    if(this.interval) {
+      clearInterval(this.interval);
+    }
+    this.update((state) => {
+      state.game.isOver = true;
+      return state;
+    });
   }
   speak(str) {
     const rate = this.state.tempo.bpm / 100.0;
@@ -115,10 +188,18 @@ class App extends Flux {
   nextStep() {
     const idx = (this.state.tempo.beat + 1) % this.state.tempo.measure;
     if(idx === 0){
+      if(!this.isFlagCorrect()){
+        console.log('gameover!');
+        this.gameover();
+        return;
+      }
+      // TODO: make method
+      // set new order
       const order = randomIn(orders);
       this.update( (state) => {
-        state.game = Object.assign(state.game, order);
-        console.log(state);
+        state.game.label = order.label;
+        state.game.order = Object.assign(state.game.order, order.order);
+        state.game.round++;
         return state;
       });
     }
@@ -131,48 +212,28 @@ class App extends Flux {
   }
   subscribe() {
     this.speaker = new Speaker();
+    this.on('startGame', ()=>{
+      this.start();
+    });
     this.on('toggleWhite', ()=>{
-      this.speak('白');
       this.update((state) => {
         const me = getPlayer(state);
         const whiteUp = me.flag.white;
         me.flag.white = whiteUp === 'up' ? 'down' : 'up';
         return state;
       });
-    })
+    });
     this.on('toggleRed', ()=>{
-      this.speak('赤');
       this.update((state) => {
         const me = getPlayer(state);
         const redUp = me.flag.red;
         me.flag.red = redUp === 'up' ? 'down' : 'up';
         return state;
       });
-    })
+    });
   }
   render(state) {
     return <Root {...state}/>;
-  }
-}
-
-class Controller extends Component {
-  render() {
-    return <div className='controller'>
-    <input type='button' onClick={() => this.dispatch('toggleRed')} value='red' />
-    <input type='button' onClick={() => this.dispatch('toggleWhite')} value='white' />
-    </div>
-  }
-}
-class Root extends Component {
-  render() {
-    const me = getPlayer(this.props);
-    return (
-    <div className='root'>
-    <Bird {...me}/>
-    <Order {...this.props}/>
-    <Controller />
-    </div>
-    )
   }
 }
 
