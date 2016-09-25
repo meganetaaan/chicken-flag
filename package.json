@@ -18,5 +18,6 @@
   },
   "eslintConfig": {
     "extends": "./node_modules/react-scripts/config/eslint.js"
-  }
+  },
+  "homepage": "https://meganetaaan.github.io/chicken-flag/"
 }
