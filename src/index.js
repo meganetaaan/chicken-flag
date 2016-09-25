@@ -50,3 +50,4 @@ const app = new App({
 });
 
 app.update(_initialState  => _initialState);
+document.querySelector('#app').addEventListener('contextmenu', function(ev){ev.preventDefault();});

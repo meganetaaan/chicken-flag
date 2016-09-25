@@ -111,8 +111,8 @@ class Bird extends Component {
     const src = require('./' + srcUrl[isRedUp][isWhiteUp]);
     const alt = `red flags ${isRedUp ? 'up' : 'down'} and white flags ${isWhiteUp ? 'up' : 'down'}`;
     return (
-      <div className='avator' >
-      <img style={{width: '400px'}} src={src} alt={alt}/>
+      <div className='avator' style={{flexGrow:'4', display: 'flex', alignItems: 'flex-start'}}>
+      <img style={{width: '100%', maxWidth: '500px', margin: 'auto'}} src={src} alt={alt}/>
       </div>
     );
   }
@@ -123,23 +123,38 @@ class Order extends Component {
     const tempo = this.props.tempo;
     const game = this.props.game;
     const str = game.label.slice(0, tempo.beat + 1).join(' ');
-    return <div className='order-label'>{str}</div>
+    return <div style={{
+      flexGrow: '1',
+      fontSize: '2.5em',
+      textAlign: 'center',
+    }}
+    className='order-label'>{str}</div>
   }
 }
 
 class GameController extends Component {
   render() {
-    return <div className='game-controller'>
-    <button disabled={!this.props.isOver} type='button' onClick={() => this.dispatch('startGame')}>Start</button>
+    return <div className='game-controller' style={{flexGrow: '1'}}>
+    <button style={{
+      width: '100%',
+      fontSize: '2em',
+    }}
+    disabled={!this.props.isOver}
+    type='button'
+    onClick={() => this.dispatch('startGame')}>Start</button>
     </div>
   }
 
 }
 class FlagController extends Component {
   render() {
-    return <div className='flag-controller'>
-    <button type='button' onClick={() => this.dispatch('toggleRed')}>Red</button>
-    <button type='button' onClick={() => this.dispatch('toggleWhite')}>White</button>
+    const style = {
+      width: '50%',
+      fontSize: '2em',
+    };
+    return <div className='flag-controller' style={{flexGrow: '2'}}>
+    <button style={style} type='button' onClick={() => this.dispatch('toggleRed')}>Red</button>
+    <button style={style} type='button' onClick={() => this.dispatch('toggleWhite')}>White</button>
     </div>
   }
 }
@@ -148,7 +163,15 @@ class Root extends Component {
   render() {
     const me = getPlayer(this.props);
     return (
-      <div className='root' style={{margin: 0, padding: 5}}>
+      <div className='root' style={
+        {
+          display: 'flex',
+          flexDirection: 'column',
+          margin: 'auto',
+          padding: 5,
+          width: '90%',
+          maxWidth: '800px',
+        }}>
       <GameController {...this.props.game}/>
       <Order {...this.props}/>
       <hr />
