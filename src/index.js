@@ -8,7 +8,7 @@ const app = new App({
   },
   middlewares: [
     (state) => {
-      console.log(state);
+      //console.log(state);
       return state;
     }
   ],

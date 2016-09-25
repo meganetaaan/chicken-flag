@@ -12,72 +12,72 @@ function randomIn(arr){
 
 const orders = [
   {
-      label: [
-        '赤',
-        'あげ',
-        'て',
-        ' '
-      ],
-      order: {
-        red: 'up'
-      }
+    label: [
+      '赤',
+      'あげ',
+      'て',
+      ' '
+    ],
+    order: {
+      red: 'up'
+    }
   },
   {
-      label: [
-        '赤',
-        'さげ',
-        'て',
-        ' '
-      ],
-      order: {
-        red: 'down'
-      }
+    label: [
+      '赤',
+      'さげ',
+      'て',
+      ' '
+    ],
+    order: {
+      red: 'down'
+    }
   },
   {
-      label: [
-        '白',
-        'あげ',
-        'て',
-        ' '
-      ],
-      order: {
-        white: 'up'
-      }
+    label: [
+      '白',
+      'あげ',
+      'て',
+      ' '
+    ],
+    order: {
+      white: 'up'
+    }
   },
   {
-      label: [
-        '赤',
-        'あげ',
-        'ない',
-        'で'
-      ],
-      order: {
-        red: 'down',
-      }
+    label: [
+      '赤',
+      'あげ',
+      'ない',
+      'で'
+    ],
+    order: {
+      red: 'down',
+    }
   },
   {
-      label: [
-        '白',
-        'さげ',
-        'つつ',
-        'も'
-      ],
-      order: {
-        white: 'down'
-      }
+    label: [
+      '白',
+      'さげ',
+      'つつ',
+      'も'
+    ],
+    order: {
+      white: 'down'
+    }
   },
 ];
 
 const translation = {
   '赤': 'acka',
-  '白': 'seiro',
+  '白': 'seero',
   'あげ': 'ah gay',
   'さげ': 'sir gay',
   'て': 'tay',
   'ない': 'night',
   'で': 'day',
-  'つつ': 'tutu',
-  'も': 'mow',
+  'つつ': 'tuts',
+  'も': 'mo',
   ' ': ' ',
   'ず': 'zoo',
   'に': 'knee',
@@ -98,12 +98,23 @@ class Bird extends Component {
   render() {
     const isRedUp = this.props.flag.red === 'up';
     const isWhiteUp = this.props.flag.white === 'up';
+    const srcUrl = {
+      true : {
+        true : 'tori_up.png',
+        false : 'tori_red.png'
+      },
+      false : {
+        true : 'tori_white.png',
+        false : 'tori_down.png'
+      }
+    };
+    const src = require('./' + srcUrl[isRedUp][isWhiteUp]);
+    const alt = `red flags ${isRedUp ? 'up' : 'down'} and white flags ${isWhiteUp ? 'up' : 'down'}`;
     return (
-      <div className='avator'>
-      <div>{'red flags ' + (isRedUp ? 'up' : 'down')
-        + ' and white flags ' + (isWhiteUp ? 'up' : 'down')} </div>
+      <div className='avator' >
+      <img style={{width: '400px'}} src={src} alt={alt}/>
       </div>
-      );
+    );
   }
 }
 
@@ -137,13 +148,13 @@ class Root extends Component {
   render() {
     const me = getPlayer(this.props);
     return (
-    <div className='root' style={{margin: 0, padding: 5}}>
-    <GameController {...this.props.game}/>
-    <Order {...this.props}/>
+      <div className='root' style={{margin: 0, padding: 5}}>
+      <GameController {...this.props.game}/>
+      <Order {...this.props}/>
       <hr />
-    <Bird {...me}/>
-    <FlagController />
-    </div>
+      <Bird {...me}/>
+      <FlagController />
+      </div>
     )
   }
 }
