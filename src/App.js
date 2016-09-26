@@ -2,6 +2,13 @@ import * as React from 'react';
 import {Flux, Component} from 'flumpt';
 import './App.css';
 
+const imgSrc = {
+  'up': require('./tori_up.png'),
+  'down': require('./tori_down.png'),
+  'red' : require('./tori_red.png'),
+  'white': require('./tori_white.png')
+};
+
 function getPlayer(props) {
   return props.players.filter((p) => {return p.id === props.myId})[0];
 }
@@ -100,15 +107,15 @@ class Bird extends Component {
     const isWhiteUp = this.props.flag.white === 'up';
     const srcUrl = {
       true : {
-        true : 'tori_up.png',
-        false : 'tori_red.png'
+        true : 'up',
+        false : 'red'
       },
       false : {
-        true : 'tori_white.png',
-        false : 'tori_down.png'
+        true : 'white',
+        false : 'down'
       }
     };
-    const src = require('./' + srcUrl[isRedUp][isWhiteUp]);
+    const src = imgSrc[srcUrl[isRedUp][isWhiteUp]];
     const alt = `red flags ${isRedUp ? 'up' : 'down'} and white flags ${isWhiteUp ? 'up' : 'down'}`;
     return (
       <div className='avator' style={{flexGrow:'4', display: 'flex', alignItems: 'flex-start'}}>
@@ -125,23 +132,43 @@ class Order extends Component {
     const str = game.label.slice(0, tempo.beat + 1).join(' ');
     return <div style={{
       flexGrow: '1',
-      fontSize: '2.5em',
+      fontSize: '3em',
       textAlign: 'center',
     }}
     className='order-label'>{str}</div>
   }
 }
 
+class Title extends Component {
+  render() {
+    return <span style={Object.assign(this.props.style, {
+      color: '#FAFAFA',
+      fontSize: '1.2em',
+      width: '100px',
+    })}>Chicken Flags</span>;
+  }
+}
 class GameController extends Component {
   render() {
-    return <div className='game-controller' style={{flexGrow: '1'}}>
+    return <div className='game-controller' style={{
+      flexGrow: '1',
+      display: 'flex',
+      alignItems: 'center',
+      padding: '5px',
+      color: '#FAFAFA',
+    }}>
     <button style={{
-      width: '100%',
-      fontSize: '2em',
+      fontSize: '1.2em',
+      flexGrow: 3
     }}
     disabled={!this.props.isOver}
     type='button'
-    onClick={() => this.dispatch('startGame')}>Start</button>
+    onClick={() => this.dispatch('startGame')}>Start Game</button>
+    <div style={{
+      fontSize: '1.2em',
+      textAlign: 'center',
+      flexGrow: 7,
+    }}>{'score:'}{this.props.round}</div>
     </div>
   }
 
@@ -163,7 +190,27 @@ class Root extends Component {
   render() {
     const me = getPlayer(this.props);
     return (
-      <div className='root' style={
+      <div className='root' style={{
+        margin: 0,
+        padding: 0,
+        position: 'absolute',
+        height: '100%',
+        width: '100%',
+        backgroundColor: '#FAFAFA',
+      }}>
+      <div className='header-area' style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '3em',
+        backgroundColor: '#1976D2',
+        boxShadow: 'rgba(0, 0, 0, 0.701961) 0px 0px 4px, rgba(0, 0, 0, 0.137255) 0px 2px 4px',
+      }}>
+      <Title style={{flexGrow: 8}}/>
+      <GameController style={{flexGrow: 2}} {...this.props.game}/>
+      </div>
+      <div className='content-area' style={
         {
           display: 'flex',
           flexDirection: 'column',
@@ -171,12 +218,17 @@ class Root extends Component {
           padding: 5,
           width: '90%',
           maxWidth: '800px',
+          userSelect: 'none',
+          MozUserSelect:'none',
+          WebkitUserSelect:'none',
+          msUserSelect:'none',
         }}>
-      <GameController {...this.props.game}/>
+      <hr />
       <Order {...this.props}/>
       <hr />
       <Bird {...me}/>
       <FlagController />
+      </div>
       </div>
     )
   }
