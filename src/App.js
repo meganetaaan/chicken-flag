@@ -17,6 +17,7 @@ function randomIn(arr){
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// TODO: generate orders
 const orders = [
   {
     label: [
@@ -32,12 +33,34 @@ const orders = [
   {
     label: [
       '赤',
+      'あげ',
+      'ない',
+      ' '
+    ],
+    order: {
+      red: 'down'
+    }
+  },
+  {
+    label: [
+      '赤',
       'さげ',
       'て',
       ' '
     ],
     order: {
       red: 'down'
+    }
+  },
+  {
+    label: [
+      '赤',
+      'さげ',
+      'ない',
+      ' '
+    ],
+    order: {
+      red: 'up'
     }
   },
   {
@@ -53,6 +76,41 @@ const orders = [
   },
   {
     label: [
+      '白',
+      'あげ',
+      'ない',
+      ' '
+    ],
+    order: {
+      white: 'down'
+    }
+  },
+  {
+    label: [
+      '白',
+      'さげ',
+      'て',
+      ' '
+    ],
+    order: {
+      white: 'down'
+    }
+  },
+  {
+    label: [
+      '白',
+      'さげ',
+      'ない',
+      ' '
+    ],
+    order: {
+      white: 'up'
+    }
+  },
+];
+const thirdOrders = [
+  {
+    label: [
       '赤',
       'あげ',
       'ない',
@@ -60,6 +118,72 @@ const orders = [
     ],
     order: {
       red: 'down',
+    }
+  },
+  {
+    label: [
+      '赤',
+      'さげ',
+      'ない',
+      'で'
+    ],
+    order: {
+      red: 'up',
+    }
+  },
+  {
+    label: [
+      '白',
+      'あげ',
+      'ない',
+      'で'
+    ],
+    order: {
+      white: 'down',
+    }
+  },
+  {
+    label: [
+      '白',
+      'さげ',
+      'ない',
+      'で'
+    ],
+    order: {
+      white: 'up',
+    }
+  },
+  {
+    label: [
+      '赤',
+      'あげ',
+      'つつ',
+      'も'
+    ],
+    order: {
+      red: 'up'
+    }
+  },
+  {
+    label: [
+      '赤',
+      'さげ',
+      'つつ',
+      'も'
+    ],
+    order: {
+      red: 'down'
+    }
+  },
+  {
+    label: [
+      '白',
+      'あげ',
+      'つつ',
+      'も'
+    ],
+    order: {
+      white: 'up'
     }
   },
   {
@@ -95,7 +219,7 @@ class Speaker {
     const speechStr = translation[str];
     window.speechSynthesis.cancel();
     const speakThis = new SpeechSynthesisUtterance(speechStr);
-    //speakThis.lang = 'ja-JP';
+    speakThis.lang = 'en-US';
     speakThis.rate = rate || 1.2;
     window.speechSynthesis.speak(speakThis);
   }
@@ -258,7 +382,17 @@ class App extends Flux {
       this.nextStep();
     }, interval);
   }
-  gameover() {
+  levelUp() {
+    if(this.interval){
+      clearInterval(this.interval);
+    }
+    const interval = 60 * 1000 / (this.state.tempo.bpm + 2 * this.state.game.round)
+    console.log(interval);
+    this.interval = setInterval(() => {
+      this.nextStep();
+    }, interval);
+  }
+  gameOver() {
     if(this.interval) {
       clearInterval(this.interval);
     }
@@ -276,12 +410,12 @@ class App extends Flux {
     if(idx === 0){
       if(!this.isFlagCorrect()){
         console.log('gameover!');
-        this.gameover();
+        this.gameOver();
         return;
       }
       // TODO: make method
       // set new order
-      const order = randomIn(orders);
+      const order = this.state.game.round % 4 === 3 ? randomIn(thirdOrders) : randomIn(orders);
       this.update( (state) => {
         state.game.label = order.label;
         state.game.order = Object.assign(state.game.order, order.order);
@@ -295,6 +429,9 @@ class App extends Flux {
       state.tempo.beat = idx;
       return state;
     });
+    if(idx === 0 && this.state.game.round % 10 === 5 ) {
+      this.levelUp();
+    }
   }
   subscribe() {
     this.speaker = new Speaker();
