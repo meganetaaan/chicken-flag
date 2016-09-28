@@ -14,7 +14,7 @@ const app = new App({
   ],
   initialState: {
     tempo: {
-      beat: 1,
+      beat: -1,
       measure: 4,
       bpm: 120
     },
@@ -22,10 +22,10 @@ const app = new App({
       isOver: true,
       round: 0,
       label: [
-        '白',
-        'あげ',
-        'ず',
-        'に'
+        '1',
+        '2',
+        '3',
+        'Go'
       ],
       order: {
         red: 'down',

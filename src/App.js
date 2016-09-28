@@ -200,6 +200,10 @@ const thirdOrders = [
 ];
 
 const translation = {
+  '1': 'one',
+  '2': 'two',
+  '3': 'three',
+  'Go!': 'go',
   '赤': 'acka',
   '白': 'seero',
   'あげ': 'ah gay',
@@ -215,12 +219,13 @@ const translation = {
 }
 
 class Speaker {
-  speak(str, rate){
-    const speechStr = translation[str];
+  speak(str, rate, pitch){
+    const speechStr = translation[str] || str;
     window.speechSynthesis.cancel();
     const speakThis = new SpeechSynthesisUtterance(speechStr);
     speakThis.lang = 'en-US';
     speakThis.rate = rate || 1.2;
+    speakThis.pitch = pitch || 1.0;
     window.speechSynthesis.speak(speakThis);
   }
 }
@@ -259,7 +264,7 @@ class Order extends Component {
       fontSize: '3em',
       textAlign: 'center',
     }}
-    className='order-label'>{str}</div>
+    className='order-label'>{str || 'Click 2 Start \u261D'}</div>
   }
 }
 
@@ -274,6 +279,7 @@ class Title extends Component {
 }
 class GameController extends Component {
   render() {
+    const round = this.props.round < 0 ? 0 : this.props.round;
     return <div className='game-controller' style={{
       flexGrow: '1',
       display: 'flex',
@@ -292,7 +298,7 @@ class GameController extends Component {
       fontSize: '1.2em',
       textAlign: 'center',
       flexGrow: 7,
-    }}>{'score:'}{this.props.round}</div>
+    }}>{'score:'}{round}</div>
     </div>
   }
 
@@ -372,7 +378,8 @@ class App extends Flux {
     this.update((state) => {
       state.game.isOver = false;
       state.game.order = {red: 'down', white: 'down'};
-      state.game.round = 0;
+      state.game.round = -1;
+      state.game.label = ['1', '2', '3', 'Go!'];
       getPlayer(state).flag = {red: 'down', white: 'down'};
       state.tempo.beat = 0;
       return state;
@@ -387,12 +394,12 @@ class App extends Flux {
       clearInterval(this.interval);
     }
     const interval = 60 * 1000 / (this.state.tempo.bpm + 2 * this.state.game.round)
-    console.log(interval);
     this.interval = setInterval(() => {
       this.nextStep();
     }, interval);
   }
   gameOver() {
+    this.speaker.speak('game over', 0.9);
     if(this.interval) {
       clearInterval(this.interval);
     }
@@ -403,13 +410,13 @@ class App extends Flux {
   }
   speak(str) {
     const rate = this.state.tempo.bpm / 100.0;
-    this.speaker.speak(str, rate);
+    const pitch = rate - 0.2;
+    this.speaker.speak(str, rate, pitch);
   }
   nextStep() {
     const idx = (this.state.tempo.beat + 1) % this.state.tempo.measure;
     if(idx === 0){
-      if(!this.isFlagCorrect()){
-        console.log('gameover!');
+      if(this.state.game.round >= 0 && !this.isFlagCorrect()){
         this.gameOver();
         return;
       }
