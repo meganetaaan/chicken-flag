@@ -9,6 +9,11 @@ const imgSrc = {
   'white': require('./tori_white.png')
 };
 
+Object.keys(imgSrc).forEach((k)=>{
+  const img = new Image();
+  img.src = imgSrc[k];
+});
+
 function getPlayer(props) {
   return props.players.filter((p) => {return p.id === props.myId})[0];
 }
